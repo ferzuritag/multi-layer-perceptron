@@ -1,87 +1,72 @@
 import numpy as np
 from helpers.sigmoid import sigmoid, sigmoid_derivative
-import math
-import matplotlib.pyplot as plt
-import math
 
-np.random.seed(52)
-#X = patterns
-#Y = outputs
-#H = neurons on hidden layer
-#nu = learning_rate
-#Tmax = max epoch
-#opt = draw learning curve
 
-def trainMLP(patterns, outputs, n_neurons, learning_rate, max_epochs, min_error, opt):
+#patterns and outputs should be np arrays
+def classifyMLP(patterns,outputs,W_input_hidden,W_hidden_output):
+    hidden_layer_w_sum = np.dot(patterns, W_input_hidden)
+    hidden_layer_output = sigmoid_derivative(hidden_layer_w_sum)
+
+    output_layer_sum = np.dot(hidden_layer_output, W_hidden_output)
+    output_layer_output = sigmoid(output_layer_sum)
+
+    error = output_layer_output - outputs
     
-    n_outputs = 1
-    patterns = np.array(patterns)
-    
-    n_patterns, n_entries = patterns.shape
-    biases = np.ones((n_patterns, 1))
+    return output_layer_output, error
 
-    patterns = np.hstack((patterns,biases))
-    n_patterns, n_entries = patterns.shape
-     
 
-    W_input_hidden = np.random.rand(n_entries, n_neurons)
-    W_hidden_output = np.random.rand(n_neurons, n_outputs)
-
-    mean_history = [] 
-    mean_error = float("Inf")
+def trainMLP(
+    patterns,
+    outputs,
+    hidden_layer_size,
+    learning_rate,
+    max_epochs,
+    min_error
+):
+    output_size = 1
+    _, n_of_entries = patterns.shape
+    W_input_hidden = np.random.rand(n_of_entries, hidden_layer_size)
+    W_hidden_output = np.random.rand(hidden_layer_size, output_size)
 
     epoch_index = 0
+    mean_error = float("Inf")
 
-    while((mean_error > min_error) & (epoch_index < max_epochs)):
-        #forward
-        hidden_output = sigmoid(np.dot(patterns, W_input_hidden))
-        net_outputs = sigmoid(np.dot(hidden_output, W_hidden_output))
-        
-        #backpropagation
-        output_error = net_outputs - outputs
+    while((epoch_index < max_epochs)):
+        #feed foward
+        hidden_layer_w_sum = np.dot(patterns, W_input_hidden)
+        hidden_layer_output = sigmoid(hidden_layer_w_sum)
 
-        mean_error = np.mean(np.abs(output_error))
-        mean_history.append(mean_error)
+        output_layer_sum = np.dot(hidden_layer_output, W_hidden_output)
+        output_layer_output = sigmoid(output_layer_sum)
 
-        delta_output = output_error * sigmoid_derivative(net_outputs)
-        error_hidden = delta_output.dot(W_hidden_output.T)
-        delta_hidden = error_hidden * sigmoid_derivative(hidden_output)
+        error = output_layer_output - outputs
+        # Backpropagation
+        d_output = error * sigmoid_derivative(output_layer_output)
+        error_hidden = d_output.dot(W_hidden_output.T)
+        d_hidden = error_hidden * sigmoid_derivative(hidden_layer_output)
 
         #update weights
-        W_hidden_output += hidden_output.T.dot(delta_output) * learning_rate
-        W_input_hidden += patterns.T.dot(delta_hidden) * learning_rate
+        W_hidden_output += hidden_layer_output.T.dot(d_output) * learning_rate
+        W_input_hidden += patterns.T.dot(d_hidden) * learning_rate
 
         epoch_index += 1
 
     return W_input_hidden, W_hidden_output
 
-def classifMultiLayerPerceptron(patterns, outputs, W_input_hidden,W_hidden_output):
-    patterns = np.array(patterns)
-    
-    n_patterns, n_entries = patterns.shape
-    biases = np.ones((n_patterns, 1))
-
-    patterns = np.hstack((patterns,biases))
-    n_patterns, n_entries = patterns.shape
-
-    hidden_output = sigmoid(np.dot(patterns, W_input_hidden))
-    net_outputs = sigmoid(np.dot(hidden_output, W_hidden_output))
-
-    return net_outputs
 
 
-X = [[0,0],[0,1],[1,0],[1,1]]
-Y = [[0],[1],[1],[0]]
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+Y = np.array([[0], [1], [1], [0]])
 
-Wij,Wjk = trainMLP(
+W_input_hidden, W_hidden_output = trainMLP(
     X,
     Y,
-    learning_rate=0.0001,
-    max_epochs=4000,
-    min_error=math.pow(math.e, -9),
-    n_neurons=3,
-    opt=True
+    hidden_layer_size=3,
+    learning_rate=0.1,
+    max_epochs=10000,
+    min_error=0.1123412
 )
 
-foo = classifMultiLayerPerceptron(X, Y, Wij, Wjk)
-print(foo)
+predictions, _ = classifyMLP(X,Y,W_input_hidden, W_hidden_output)
+
+print(np.round(predictions))

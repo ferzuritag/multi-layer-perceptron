@@ -24,6 +24,7 @@ class MLP:
     def forward(self, X):
         self.hidden_layer_input = np.dot(X, self.weights_input_hidden)
         self.hidden_layer_output = ActivationFunction.sigmoid(self.hidden_layer_input)
+        
         self.output_layer_input = np.dot(self.hidden_layer_output, self.weights_hidden_output)
         self.output_layer_output = ActivationFunction.sigmoid(self.output_layer_input)
         return self.output_layer_output
@@ -65,4 +66,4 @@ mlp.train(X, y, num_iterations=10000, learning_rate=0.1)
 # Testing the trained network
 predictions = mlp.predict(X)
 print("Predicted Output:")
-print(predictions)
+print(np.round(predictions))
