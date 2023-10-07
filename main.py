@@ -1,68 +1,87 @@
 import numpy as np
-import time
-import math
 from helpers.sigmoid import sigmoid, sigmoid_derivative
+import math
+import matplotlib.pyplot as plt
+import math
+
+np.random.seed(52)
+#X = patterns
+#Y = outputs
+#H = neurons on hidden layer
+#nu = learning_rate
+#Tmax = max epoch
+#opt = draw learning curve
+
+def trainMLP(patterns, outputs, n_neurons, learning_rate, max_epochs, min_error, opt):
+    
+    n_outputs = 1
+    patterns = np.array(patterns)
+    
+    n_patterns, n_entries = patterns.shape
+    biases = np.ones((n_patterns, 1))
+
+    patterns = np.hstack((patterns,biases))
+    n_patterns, n_entries = patterns.shape
+     
+
+    W_input_hidden = np.random.rand(n_entries, n_neurons)
+    W_hidden_output = np.random.rand(n_neurons, n_outputs)
+
+    mean_history = [] 
+    mean_error = float("Inf")
+
+    epoch_index = 0
+
+    while((mean_error > min_error) & (epoch_index < max_epochs)):
+        #forward
+        hidden_output = sigmoid(np.dot(patterns, W_input_hidden))
+        net_outputs = sigmoid(np.dot(hidden_output, W_hidden_output))
+        
+        #backpropagation
+        output_error = net_outputs - outputs
+
+        mean_error = np.mean(np.abs(output_error))
+        mean_history.append(mean_error)
+
+        delta_output = output_error * sigmoid_derivative(net_outputs)
+        error_hidden = delta_output.dot(W_hidden_output.T)
+        delta_hidden = error_hidden * sigmoid_derivative(hidden_output)
+
+        #update weights
+        W_hidden_output += hidden_output.T.dot(delta_output) * learning_rate
+        W_input_hidden += patterns.T.dot(delta_hidden) * learning_rate
+
+        epoch_index += 1
+
+    return W_input_hidden, W_hidden_output
+
+def classifMultiLayerPerceptron(patterns, outputs, W_input_hidden,W_hidden_output):
+    patterns = np.array(patterns)
+    
+    n_patterns, n_entries = patterns.shape
+    biases = np.ones((n_patterns, 1))
+
+    patterns = np.hstack((patterns,biases))
+    n_patterns, n_entries = patterns.shape
+
+    hidden_output = sigmoid(np.dot(patterns, W_input_hidden))
+    net_outputs = sigmoid(np.dot(hidden_output, W_hidden_output))
+
+    return net_outputs
 
 
-def trainMLP(
-    input_patterns,
-    patterns_output,
-    hidden_layer_size,
-    learning_rate,
-    alpha,
-    max_epochs,
-    min_error_for_convergence,
-    shouldGraphic = False,
-    output_size = 1
-):
-    #set the patterns as numpy array
-    patterns = np.array(input_patterns)
-    #destructure rows and columns
-    number_of_patterns, number_of_entries = patterns.shape
-    #set the biases column
-    biases_column = np.ones((number_of_patterns, 1), dtype=int)
-    patterns = np.hstack((patterns,biases_column))
-    #update the destructured columns
-    number_of_patterns, number_of_entries = patterns.shape
-    # initialize error counter
-    error = float("inf")
-    epoch_counter = 0
-    #intialize weights
-    weights_from_patterns_to_hidden_layer = np.random.rand(number_of_entries, hidden_layer_size)
-    weights_from_hidden_layer_to_output = np.random.rand(hidden_layer_size, output_size)
+X = [[0,0],[0,1],[1,0],[1,1]]
+Y = [[0],[1],[1],[0]]
 
+Wij,Wjk = trainMLP(
+    X,
+    Y,
+    learning_rate=0.0001,
+    max_epochs=4000,
+    min_error=math.pow(math.e, -9),
+    n_neurons=3,
+    opt=True
+)
 
-    while ((error > min_error_for_convergence) & (epoch_counter < max_epochs)):
-        time.sleep(1)
-        print("for epoch", epoch_counter)
-        for index,pattern in enumerate(patterns):
-            #feed foward
-            #calculate ponderated sum
-            hidden_layer_sum = np.dot(pattern, weights_from_patterns_to_hidden_layer)
-            #calculate output of hidden_layer
-            hidden_layer_outputs = sigmoid(hidden_layer_sum) 
-            #calculate the output
-            output_sum = np.dot(hidden_layer_outputs, weights_from_hidden_layer_to_output)
-            output = sigmoid(output_sum)
-
-            loss = patterns_output[index] - output
-            print(f"loss {loss}")
-
-        epoch_counter += 1
-
-patterns = [
-    [0,0],
-    [0,1],
-    [1,0],
-    [1,1]
-]
-
-patterns_output = [0,1,1,0]
-
-trainMLP(input_patterns=patterns,
-    patterns_output=patterns_output,
-    hidden_layer_size=3,
-    learning_rate=0.001,
-    alpha=0.001,
-    max_epochs=10000,
-    min_error_for_convergence=math.pow(math.e, -9))
+foo = classifMultiLayerPerceptron(X, Y, Wij, Wjk)
+print(foo)
