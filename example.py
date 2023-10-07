@@ -1,3 +1,5 @@
+#Este es el archivo en el que me baso para hacer el algoritmo del archivo main
+
 import numpy as np
 
 # Define the activation function and its derivative

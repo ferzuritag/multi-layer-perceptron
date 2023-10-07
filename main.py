@@ -68,5 +68,3 @@ W_input_hidden, W_hidden_output = trainMLP(
 )
 
 predictions, _ = classifyMLP(X,Y,W_input_hidden, W_hidden_output)
-
-print(np.round(predictions))
