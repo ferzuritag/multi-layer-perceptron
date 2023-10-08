@@ -1,7 +1,7 @@
 import numpy as np
 from helpers.sigmoid import sigmoid, sigmoid_derivative
 
-
+np.random.seed(42)
 #patterns and outputs should be np arrays
 def classifyMLP(patterns,outputs,W_input_hidden,W_hidden_output):
     hidden_layer_w_sum = np.dot(patterns, W_input_hidden)
@@ -40,6 +40,7 @@ def trainMLP(
         output_layer_output = sigmoid(output_layer_sum)
 
         error = output_layer_output - outputs
+
         # Backpropagation
         d_output = error * sigmoid_derivative(output_layer_output)
         error_hidden = d_output.dot(W_hidden_output.T)
@@ -52,19 +53,3 @@ def trainMLP(
         epoch_index += 1
 
     return W_input_hidden, W_hidden_output
-
-
-
-X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-Y = np.array([[0], [1], [1], [0]])
-
-W_input_hidden, W_hidden_output = trainMLP(
-    X,
-    Y,
-    hidden_layer_size=3,
-    learning_rate=0.1,
-    max_epochs=10000,
-    min_error=0.1123412
-)
-
-predictions, _ = classifyMLP(X,Y,W_input_hidden, W_hidden_output)
