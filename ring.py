@@ -1,9 +1,10 @@
 from helpers.plots import plotFile
-
-
+import math
 
 plotFile("datasets/ring.mat",
-    hidden_layer_size=8,
-    learning_rate=0.001,
-    max_epochs=1000
+    hidden_layer_size=3,
+    learning_rate=0.01,
+    max_epochs=100000,
+    min_error_for_convergence=math.pow(math.e,-9),
+    draw_mean=True
 )
