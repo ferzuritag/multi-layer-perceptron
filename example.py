@@ -2,6 +2,7 @@
 
 import numpy as np
 
+np.random.seed(0)
 # Define the activation function and its derivative
 class ActivationFunction:
     @staticmethod
@@ -56,11 +57,11 @@ class MLP:
         return self.forward(X)
 
 # Training data (XOR problem)
-X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+X = np.array([[0, 0,1], [0, 1,1], [1, 0,1], [1, 1,1]])
 y = np.array([[0], [1], [1], [0]])
 
 # Create an MLP with 2 input neurons, 4 hidden neurons, and 1 output neuron
-mlp = MLP(input_size=2, hidden_size=4, output_size=1)
+mlp = MLP(input_size=3, hidden_size=3, output_size=1)
 
 # Train the MLP
 mlp.train(X, y, num_iterations=10000, learning_rate=0.1)
@@ -68,4 +69,4 @@ mlp.train(X, y, num_iterations=10000, learning_rate=0.1)
 # Testing the trained network
 predictions = mlp.predict(X)
 print("Predicted Output:")
-print(np.round(predictions))
+print(predictions)
